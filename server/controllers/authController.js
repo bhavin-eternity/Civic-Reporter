@@ -10,7 +10,7 @@ const signup = async (req, res) => {
             return res.status(400).json({ message: 'Email alredy in use!' });
         }
 
-        const user = await User.create({ name, email, password, role });
+        const user = await User.create({ name, email, password });
 
         res.status(201).json({
             _id: user._id,
