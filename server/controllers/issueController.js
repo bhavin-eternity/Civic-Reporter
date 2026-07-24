@@ -1,4 +1,5 @@
 const Issue = require('../models/Issue');
+const { getIO } = require('../config/socket');
 //ISSUES
 // POST   /api/issues                    → protected, citizen
 // GET    /api/issues                    → public, supports ?category=&status=
@@ -61,6 +62,10 @@ const createIssue = async (req, res) => {
             author: req.user._id,
         });
         await issue.populate('author', 'name email');
+
+        const io = getIO();
+        io.to('admins').emit('new-issue', issue);
+
         res.status(201).json(issue);
     } catch (error) {
         res.status(500).json({ message: error.message })
@@ -192,6 +197,13 @@ const updateStatus = async (req, res) => {
         issue.status = req.body.status || issue.status;
 
         const updated = await issue.save();
+
+        const io = getIO();
+        io.to(`user-${issue.author}`).emit('issue-status-updated', {
+            issueId: issue._id,
+            status: issue.status,
+        });
+        
         res.json(updated)
     } catch (error) {
         res.status(500).json({ message: error.message })
