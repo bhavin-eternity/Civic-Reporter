@@ -3,7 +3,7 @@ const connectDB = require('./config/db');
 const express = require('express');
 const cors = require('cors')
 const authRoutes =require('./routes/authRoutes');
-
+const issueRoutes = require('./routes/issueRoutes')
 const app = express();
 
 connectDB();
@@ -16,6 +16,7 @@ app.get('/api/health', (req, res) => {
 })
 
 app.use('/api/auth',authRoutes)
+app.use('/api/issues',issueRoutes)
 
 
 app.listen(process.env.PORT || 5000, () => {
