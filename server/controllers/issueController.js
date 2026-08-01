@@ -28,6 +28,7 @@ const getAllIssues = async (req, res) => {
         if (status && validStatuses.includes(status)) filter.status = status;
 
         const issues = await Issue.find(filter)
+            .populate('author', 'name email')
             .sort({ createdAt: -1 })
             .skip((page - 1) * limit)
             .limit(limit);
@@ -96,7 +97,8 @@ const getMyIssues = async (req, res) => {
     try {
         const ownIssues = await Issue.find({
             author: req.user._id
-        });
+        }).populate('author', 'name email')
+            .sort({ createdAt: -1 });
 
         res.status(200).json({
             count: ownIssues.length,
@@ -135,6 +137,7 @@ const updateIssue = async (req, res) => {
         }
 
         const updatedPost = await issue.save();
+        await updatedIssue.populate('author', 'name email');
         res.json(updatedPost)
 
 
@@ -203,7 +206,7 @@ const updateStatus = async (req, res) => {
             issueId: issue._id,
             status: issue.status,
         });
-        
+
         res.json(updated)
     } catch (error) {
         res.status(500).json({ message: error.message })
